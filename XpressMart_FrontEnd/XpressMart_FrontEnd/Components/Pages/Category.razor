@@ -1,0 +1,449 @@
+﻿@page "/Category"
+@page "/Category/{id:int}"
+
+@using XpressMart_FrontEnd.Client.CategoryClient
+@using XpressMart_FrontEnd.Client.ImageClient
+@using XpressMart_FrontEnd.Client.ProductClient
+@using XpressMart_FrontEnd.Models.Filter
+@using XpressMart_FrontEnd.Models.Response
+@using XpressMart_FrontEnd.Models.Response.BrandResponse
+@using XpressMart_FrontEnd.Models.Response.CategoryResponse
+@using XpressMart_FrontEnd.Models.Response.ProductResponse
+@using XpressMart_FrontEnd.Services.FilterService
+@using XpressMart_FrontEnd.Services.ImageService
+
+@inject IFilterService FilterService
+@inject IImageService ImageService
+@inject IJSRuntime JSRuntime
+@inject ICategoryClient CategoryClient
+@inject IProductClient ProductClient
+@inject IImageClient ImageClient
+
+
+@rendermode InteractiveServer
+
+<PageTitle>@title</PageTitle>
+	<!-- BREADCRUMB -->
+	<div id="breadcrumb" class="section">
+		<!-- container -->
+		<div class="container">
+			<!-- row -->
+			<div class="row">
+				<div class="col-md-12">
+					<ul class="breadcrumb-tree">
+						<li><a href="#">Home</a></li>
+						<li><a href="#">All Categories</a></li>
+						<li class="active">@title</li>
+					</ul>
+				</div>
+			</div>
+			<!-- /row -->
+		</div>
+		<!-- /container -->
+	</div>
+	<!-- /BREADCRUMB -->
+
+	<!-- SECTION -->
+		<div class="section">
+			<!-- container -->
+			<div class="container">
+				<!-- row -->
+				<div class="row">
+					<!-- ASIDE -->
+					<div id="aside" class="col-md-3">
+						<!-- aside Widget -->
+						<div class="aside">
+							<h3 class="aside-title">Categories</h3>
+							<div class="checkbox-filter">
+
+								<div class="input-checkbox">
+									<input type="checkbox" id="category-1">
+									<label for="category-1">
+										<span></span>
+										Laptops
+										<small>(120)</small>
+									</label>
+								</div>
+
+								<div class="input-checkbox">
+									<input type="checkbox" id="category-2">
+									<label for="category-2">
+										<span></span>
+										Smartphones
+										<small>(740)</small>
+									</label>
+								</div>
+
+								<div class="input-checkbox">
+									<input type="checkbox" id="category-3">
+									<label for="category-3">
+										<span></span>
+										Cameras
+										<small>(1450)</small>
+									</label>
+								</div>
+
+								<div class="input-checkbox">
+									<input type="checkbox" id="category-4">
+									<label for="category-4">
+										<span></span>
+										Accessories
+										<small>(578)</small>
+									</label>
+								</div>
+
+								<div class="input-checkbox">
+									<input type="checkbox" id="category-5">
+									<label for="category-5">
+										<span></span>
+										Laptops
+										<small>(120)</small>
+									</label>
+								</div>
+
+								<div class="input-checkbox">
+									<input type="checkbox" id="category-6">
+									<label for="category-6">
+										<span></span>
+										Smartphones
+										<small>(740)</small>
+									</label>
+								</div>
+							</div>
+						</div>
+						<!-- /aside Widget -->
+
+						<div class="aside">
+							<h3 class="aside-title">Price</h3>
+							<div class="price-filter">
+								<div id="price-slider"></div>
+								<div class="input-number price-min">
+									<input @bind-value="filter.MinPrice" @bind-value:event="oninput" id="price-min" type="number" step="10" min="@originalLowestPrice" max="@originalHighestPrice">
+									<span class="qty-up">+</span>
+									<span class="qty-down">-</span>
+								</div>
+								<span>-</span>
+								<div class="input-number price-max">
+									<input @bind-value="filter.MaxPrice" @bind-value:event="oninput" id="price-max" type="number" step="10" min="@originalLowestPrice" max="@originalHighestPrice">
+									<span class="qty-up">+</span>
+									<span class="qty-down">-</span>
+								</div>
+							</div>
+						</div>
+						<!-- /aside Widget -->
+
+						<!-- aside Widget -->
+						<div class="aside">
+							<h3 class="aside-title">Brand</h3>
+							<div class="checkbox-filter">
+								@foreach (var brand in AvailableBrands)
+								{
+								<div class="input-checkbox">
+									<input type="checkbox" id="brand-@brand.Id" @onchange="e => FilterService.ToggleBrandSelection(brand.Id, (bool)e.Value)">
+									<label for="brand-@brand.Id">
+										<span></span>
+										@brand.Name
+										<small>(@brand.ProductCount)</small>
+									</label>
+								</div>
+								}
+							</div>
+						</div>
+						<!-- /aside Widget -->
+
+						<br />
+						<!-- Apply Filter button -->
+						<div>
+							<button @onclick="ApplyFilter" class="primary-btn cta-btn">Apply</button>
+						</div>
+						<!-- /Apply Filter button -->
+
+						<!-- aside Widget -->
+						<div class="aside">
+							<h3 class="aside-title">Top selling</h3>
+							<div class="product-widget">
+								<div class="product-img">
+									<img src="./img/product03.png" alt="">
+								</div>
+								<div class="product-body">
+									<p class="product-category">Category</p>
+									<h3 class="product-name"><a href="#">product name goes here</a></h3>
+									<h4 class="product-price">$980.00 <del class="product-old-price">$990.00</del></h4>
+								</div>
+
+							</div>
+						</div>
+						<!-- /aside Widget -->
+					</div>
+					<!-- /ASIDE -->
+
+					<!-- STORE -->
+					<div id="store" class="col-md-9">
+						<!-- store top filter -->
+						<div class="store-filter clearfix">
+							<div class="store-sort">
+								<label>
+									Sort By:
+									<select class="input-select">
+										<option value="0">Popular</option>
+										<option value="1">Position</option>
+									</select>
+								</label>
+
+								<label>
+									Show:
+									<select class="input-select">
+										<option value="0">20</option>
+										<option value="1">50</option>
+									</select>
+								</label>
+							</div>
+							<ul class="store-grid">
+								<li class="active"><i class="fa fa-th"></i></li>
+								<li><a href="#"><i class="fa fa-th-list"></i></a></li>
+							</ul>
+						</div>
+						<!-- /store top filter -->
+
+						<!-- store products -->
+						<div class="row">
+							<!-- product -->
+						@if (Products == null)
+						{
+							<p><em>Loading...</em></p>
+						}
+						else if (Products.isSuccess)
+						{
+							@foreach (var product in Products.Data.Products)
+							{
+								<div class="col-md-4 col-xs-6">
+									<div class="product">
+										<div class="product-img">
+										@if (product.MainImageUrl != null)
+										{
+											<img src="@product.MainImageUrl" />
+										}
+										else
+										{
+											var status = ImageService.GetImageLoadingStatus(product.Id);
+
+											@switch (status)
+											{
+												case "not_started":
+													InitiateImageLoad(product);
+													<p>Initiating image load...</p>
+													break;
+												case "loading":
+													<p>Loading image...</p>
+													break;
+												case "error":
+													<p>Error loading image: @ImageService.GetImageLoadingError(product.Id)</p>
+													break;
+												default:
+													if (string.IsNullOrEmpty(product.MainImageDetail?.FileString))
+													{
+														<p>Image data is empty</p>
+													}
+													else
+													{
+														<img src="data:image/png;base64,@product.MainImageDetail.FileString" alt="@product.Name" />
+													}
+													break;
+											}
+										}
+
+											<div class="product-label">
+												<span class="sale">-30%</span>
+												<span class="new">NEW</span>
+											</div>
+										</div>
+										<div class="product-body">
+											<p class="product-category">@category.Data.Name</p>
+											<h3 class="product-name"><a href="#">@product.Name</a></h3>
+											<h4 class="product-price">@FormatPrice(product.Price)<del class="product-old-price">$990.00</del></h4>
+											<div class="product-rating">
+												<i class="fa fa-star"></i>
+												<i class="fa fa-star"></i>
+												<i class="fa fa-star"></i>
+												<i class="fa fa-star"></i>
+												<i class="fa fa-star"></i>
+											</div>
+											<div class="product-btns">
+												<button class="add-to-wishlist"><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
+												<button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
+												<button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
+											</div>
+										</div>
+										<div class="add-to-cart">
+											<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+										</div>
+									</div>
+								</div>
+							}
+						}
+						else
+						{
+							<p>Error: @Products.Error.Message</p>
+						}
+							<!-- /product -->
+						</div>
+						<!-- /store products -->
+					
+						<!-- store bottom filter -->
+						<div class="store-filter clearfix">
+							<span class="store-qty">Showing 20-100 products</span>
+							<ul class="store-pagination">
+								<li class="active">1</li>
+								<li><a href="#">2</a></li>
+								<li><a href="#">3</a></li>
+								<li><a href="#">4</a></li>
+								<li><a href="#"><i class="fa fa-angle-right"></i></a></li>
+							</ul>
+						</div>
+						<!-- /store bottom filter -->
+					</div>
+					<!-- /STORE -->
+				</div>
+				<!-- /row -->
+			</div>
+			<!-- /container -->
+		</div>
+		<!-- /SECTION -->
+
+@code {
+	[Parameter]
+	public int? Id { get; set; }
+
+	private BaseResponse<ProductListResponseModel> Products { get; set; }
+	private BaseResponse<CategoryDetailResponseModel> category;
+	private ProductFilter filter = new ProductFilter();
+	private string title = string.Empty;
+	private decimal originalLowestPrice = 0;
+	private decimal originalHighestPrice = 999;
+	private bool isInitialized = false;
+	private List<BrandResponseModel> AvailableBrands { get; set; } = new List<BrandResponseModel>();
+	private DotNetObjectReference<Category> objRef;
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		objRef = DotNetObjectReference.Create(this);
+	}
+
+	protected override async Task OnParametersSetAsync()
+	{
+		Console.WriteLine("OnParametersSetAsync called");
+		if (category != null || Id == null) return;
+
+		category = await CategoryClient.GetCategoryAsync(Id.Value);
+		if (category != null && category.isSuccess)
+		{
+			Console.WriteLine("Category loaded successfully");
+			title = category.Data.Name;
+			await FetchProductsAndApplyFilter(true);
+			if (!isInitialized)
+			{
+				AvailableBrands = FilterService.CalculateAvailableBrands(Products.Data);
+				isInitialized = true;
+			}
+		}
+		else
+		{
+			Console.WriteLine("Error loading category or category is null");
+		}
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			Console.WriteLine("OnAfterRenderAsync (firstRender) called");
+			await WaitForMinPrice();
+		}
+	}	
+
+	private async Task WaitForMinPrice()
+	{
+		while (!filter.MinPrice.HasValue && !filter.MaxPrice.HasValue)
+		{
+			Console.WriteLine("Waiting for MinMaxPrice to be set...");
+			await Task.Delay(100); // Small delay to avoid tight loop
+		}
+
+		Console.WriteLine($"MinMaxPrice is now available: {filter.MinPrice} - {filter.MaxPrice}");
+		await JSRuntime.InvokeVoidAsync("initializePriceSlider",
+			originalLowestPrice, originalHighestPrice, filter.MinPrice.Value, filter.MaxPrice ?? originalHighestPrice, objRef);
+	}
+
+	[JSInvokable]
+	public void UpdatePriceFilter(decimal minPrice, decimal maxPrice)
+	{
+		filter.MinPrice = minPrice;
+		filter.MaxPrice = maxPrice;
+		InvokeAsync(StateHasChanged); // Ensure the component is re-rendered
+	}
+
+	private string FormatPrice(decimal price)
+	{
+		return $"₦{price:N2}";
+	}
+
+	private async Task FetchProductsAndApplyFilter(bool isInitialLoad = false)
+	{
+		Console.WriteLine("Fetching products with filter");
+		filter.CategoryId = Id;
+		var queryString = FilterService.BuildQueryString(filter);
+		Console.WriteLine(queryString);
+		Products = await ProductClient.GetFilteredProductsAsync(queryString);
+		if (Products != null && Products.isSuccess && Products.Data.Products.Any())
+		{
+			Console.WriteLine("Products loaded successfully");
+			if (isInitialLoad)
+			{
+				Console.WriteLine("Should not be here second time ");
+				originalLowestPrice = Math.Ceiling(Products.Data.MinPrice);
+				originalHighestPrice = Math.Ceiling(Products.Data.MaxPrice);
+
+				if (originalLowestPrice == originalHighestPrice)
+				{
+					originalLowestPrice = Math.Max(0, originalLowestPrice - 1);
+					originalHighestPrice += 1;
+				}
+				filter.MinPrice = originalLowestPrice;
+				filter.MaxPrice = originalHighestPrice;
+
+			}
+			ImageService.ClearImageLoadingStatus();
+		}
+		else
+		{
+			Console.WriteLine("Error loading products or products are null");
+		}
+		StateHasChanged(); // Ensures state update after async operation
+	}
+
+	private async Task ApplyFilter()
+	{
+		Console.WriteLine("Applying filter");
+		await FetchProductsAndApplyFilter();
+	}
+
+	private void InitiateImageLoad(ProductResponseModel product)
+	{
+		var status = ImageService.GetImageLoadingStatus(product.Id);
+		if (!status.Equals("not_started"))
+		{
+			Console.WriteLine($"Image load already started for product {product.Id} with status: {status}");
+			return;
+		}
+
+		Console.WriteLine($"Initiating image load for product {product.Id}");
+		_ = ImageService.FetchImage(product, StateHasChanged);
+	}
+
+
+	public void Dispose()
+	{
+		objRef?.Dispose();
+	}
+}
