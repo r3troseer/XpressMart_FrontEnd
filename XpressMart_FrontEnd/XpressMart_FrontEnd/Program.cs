@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using XpressMart_FrontEnd.Components;
 using XpressMart_FrontEnd.Extension;
 
@@ -20,6 +21,10 @@ namespace XpressMart_FrontEnd
 			builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiUrl) });
 			builder.Services.AddServices();
 			builder.Services.AddClients();
+			builder.Services.AddBlazoredLocalStorage();
+			builder.Services.AddScoped<LayoutService>();
+
+
 
 			var app = builder.Build();
 

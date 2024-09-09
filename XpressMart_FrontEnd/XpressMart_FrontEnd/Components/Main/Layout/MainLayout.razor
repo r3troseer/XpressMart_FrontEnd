@@ -1,0 +1,29 @@
+﻿@inherits LayoutComponentBase
+@inject LayoutService LayoutService
+
+<NavMenu />
+
+    <main>
+        <article>
+            @Body
+        </article>
+    </main>
+    
+<FooterSection />
+
+
+<script src="_framework/blazor.web.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/slick.min.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/jquery.zoom.min.js"></script>
+<script src="js/main.js"></script>
+
+@code {
+    protected override void OnInitialized()
+    {
+        LayoutService.CurrentLayout = "main";
+        base.OnInitialized();
+    }
+}

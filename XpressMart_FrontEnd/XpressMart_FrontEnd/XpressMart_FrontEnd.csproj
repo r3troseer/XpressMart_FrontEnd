@@ -7,8 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\Admin\js\ProductsAdmin.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\XpressMart_FrontEnd.Client\XpressMart_FrontEnd.Client.csproj" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\JavaScriptService\Analytics\" />
+    <Folder Include="wwwroot\Admin\css\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Admin\js\ProductsAdmin.js" />
   </ItemGroup>
 
 </Project>

@@ -584,7 +584,7 @@ else
 
 	private async Task NewArrivals()
 	{
-		filter.StartDate = DateTime.Now.AddDays(-30);
+		filter.StartDate = DateTime.Now.AddDays(-50);
 		filter.EndDate = DateTime.Now;
 		filter.Limit = 10;
 		var queryString = FilterService.BuildQueryString(filter);

@@ -1,6 +1,36 @@
 ﻿<Router AppAssembly="typeof(Program).Assembly" AdditionalAssemblies="new[] { typeof(Client._Imports).Assembly }">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        <RouteView RouteData="routeData" DefaultLayout="@GetLayoutType(routeData)" />
     </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(Main.Layout.MainLayout)">
+            <p>Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
 </Router>
+
+<HeadContent>
+    <LayoutStyles />
+ </HeadContent>
+
+@code {
+    private static readonly string AdminNamespace = "XpressMart_FrontEnd.Components.Admin.Pages";
+    private static readonly string AuthNamespace = "XpressMart_FrontEnd.Components.Auth.Pages";
+
+    private Type GetLayoutType(RouteData routeData)
+    {
+        if (routeData.PageType.Namespace == AdminNamespace)
+        {
+            return typeof(Admin.Layout.AdminLayout);
+        }
+        else if (routeData.PageType.Namespace == AuthNamespace)
+        {
+            return typeof(Auth.Layout.AuthLayout);
+        }
+        else
+        {
+            return typeof(Main.Layout.MainLayout);
+        }
+    }
+}

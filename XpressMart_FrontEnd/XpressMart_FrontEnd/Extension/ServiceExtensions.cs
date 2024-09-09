@@ -1,5 +1,6 @@
 ﻿using XpressMart_FrontEnd.Services.FilterService;
 using XpressMart_FrontEnd.Services.ImageService;
+using XpressMart_FrontEnd.Services.JavaScriptService.Alerts;
 
 namespace XpressMart_FrontEnd.Extension
 {
@@ -9,6 +10,10 @@ namespace XpressMart_FrontEnd.Extension
 		{
 			services.AddScoped<IFilterService, FilterService>();
 			services.AddScoped<IImageService, ImageService>();
+			services.AddScoped<ToastrService>();
+
+
+			//services.AddScoped<>();
 
 			return services;
 		}

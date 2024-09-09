@@ -1,0 +1,661 @@
+﻿@page "/admin/products/add"
+
+@using XpressMart_FrontEnd.Client.BrandClient
+@using XpressMart_FrontEnd.Client.CategoryClient
+@using XpressMart_FrontEnd.Models.Request.BrandRequest
+@using XpressMart_FrontEnd.Models.Request.CategoryRequest
+@using XpressMart_FrontEnd.Models.Request.CloudinaryRequest
+@using XpressMart_FrontEnd.Client.ProductClient
+@using XpressMart_FrontEnd.Models.Request.ProductRequest
+@using XpressMart_FrontEnd.Models.Response
+@using XpressMart_FrontEnd.Models.Response.BrandResponse
+@using XpressMart_FrontEnd.Models.Response.CategoryResponse
+@using XpressMart_FrontEnd.Services.JavaScriptService.Alerts
+
+@inject IBrandClient BrandClient
+@inject ICategoryClient CategoryClient
+@inject IProductClient ProductClient
+@inject ToastrService ToastrService
+
+
+
+@rendermode InteractiveServer
+
+<style>
+    .image-upload-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        flex-wrap: wrap; 
+    }
+
+    .image-upload-box {
+        width: 150px;
+        height: 150px;
+        border: 2px dashed #ccc;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        background-color: #f8f9fa;
+        position: relative;
+        margin-right: 10px;
+        margin-bottom: 10px; /* Ensure space between rows */
+    }
+
+        .image-upload-box i {
+            font-size: 40px;
+            color: #888;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+    .image-preview-container {
+        width: 150px;
+        height: 150px;
+        position: relative;
+    }
+
+        .image-preview-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+    .overlay-button {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: transparent;
+        color: white;
+        font-size: 20px;
+        border: none;
+        cursor: pointer;
+        z-index: 2;
+        text-shadow: 0px 0px 5px black;
+        outline: none;
+    }
+
+        .overlay-button:focus {
+            outline: none; /* Ensure no outline appears when the button is focused */
+        }
+
+    .multi-preview-container {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .multi-preview-wrapper {
+        display: flex;
+        align-items: center;
+        margin-right: 10px; /* Maintain space between the images and input */
+    }
+
+    .preview-item {
+        width: 100px;
+        height: 100px;
+        position: relative;
+        margin-bottom: 10px; /* Ensure space between rows */
+        margin-right: 10px;
+    }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+    .modal-fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1050;
+        display: none;
+    }
+
+        .modal-fullscreen img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+    .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 30px;
+        color: white;
+        cursor: pointer;
+    }
+
+    .image-upload-box input {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        z-index: 1;
+    }
+        
+    .thumbnail-upload-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        justify-content: center;
+    }
+
+    .thumbnail-upload-box {
+        width: 300px; /* Wider than the regular image upload box */
+        height: 150px;
+        border: 2px dashed #ccc;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        background-color: #f8f9fa;
+        position: relative;
+        margin-right: 10px;
+    }
+
+        .thumbnail-upload-box i {
+            font-size: 40px;
+            color: #888;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+    .thumbnail-preview-container {
+        width: 300px; /* Wider than the regular image preview container */
+        height: 150px;
+        position: relative;
+    }
+
+        .thumbnail-preview-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+
+    .thumbnail-upload-box input {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        z-index: 1;
+    }
+</style>
+
+<PageTitle>Add new products</PageTitle>
+<!-- ============================================================== -->
+<!-- pageheader  -->
+<!-- ============================================================== -->
+<div class="row">
+    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+        <div class="page-header" id="top">
+            <h2 class="pageheader-title">Form Elements </h2>
+            <p class="pageheader-text">Proin placerat ante duiullam scelerisque a velit ac porta, fusce sit amet vestibulum mi. Morbi lobortis pulvinar quam.</p>
+            <div class="page-breadcrumb">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Forms</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Form Elements</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ============================================================== -->
+<!-- end pageheader  -->
+<!-- ============================================================== -->
+<!-- ============================================================== -->
+<!-- basic form  -->
+<!-- ============================================================== -->
+<div class="row">
+    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+        <div class="card">
+            <h5 class="card-header">Add New Products</h5>
+            <div class="card-body">
+                <EditForm Model="productRequest" OnValidSubmit="HandleValidSubmit" FormName="test">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="form-row align-items-end">
+                        <!-- Main Image Upload -->
+                        <div class="col-md-6">
+                            <label for="MainImage">Main Image</label>
+                            <div class="image-upload-row">
+                                <div class="image-preview-container" id="mainImagePreviewContainer" style="@(mainImagePreview.DataUrl == null ? "display: none;" : "")">
+                                    <img id="mainImagePreview" class="rounded" src="@mainImagePreview.DataUrl" alt="Main Image Preview" @onclick="() => ShowFullImageModal(mainImagePreview.DataUrl)">
+                                    <button type="button" class="overlay-button" @onclick="RemoveMainImage">&times;</button>
+                                </div>
+                                <div class="image-upload-box" id="mainImageUploadBox" style="@(mainImagePreview.DataUrl != null ? "display: none;" : "")">
+                                    <InputFile id="MainImage" OnChange="HandleMainImageUpload" accept="image/*" />
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Name -->
+                        <div class="form-group col-md-6">
+                            <label for="name">Product Name</label>
+                            <InputText id="name" class="form-control" placeholder="Enter product name" @bind-Value="productRequest.Name" />
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <InputTextArea id="description" class="form-control" placeholder="Enter product description" @bind-Value="productRequest.Description" />
+                    </div>
+
+
+                    <div class="form-row">
+                        <!-- Price -->
+                        <div class="form-group col-md-6">
+                            <label for="price">Price</label>
+                            <InputNumber id="price" class="form-control" placeholder="Enter price" step="0.01" @bind-Value="productRequest.Price" />
+                        </div>
+                        <!-- Quantity -->
+                        <div class="form-group col-md-6">
+                            <label for="quantity">Quantity</label>
+                            <InputNumber id="quantity" class="form-control" placeholder="Enter quantity" @bind-Value="productRequest.Quantity" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Category -->
+                        <div class="form-group col-md-6">
+                            <label for="categoryId">Category</label>
+                            <div class="d-flex">
+                                <InputSelect id="categoryId" class="form-control" @bind-Value="productRequest.CategoryId">
+                                    <option value="">Select Category</option>
+                                    @if (categories == null)
+                                    {
+                                        <p><em>Loading...</em></p>
+                                    }
+                                    else if (categories.isSuccess)
+                                    {
+                                        @foreach (var category in categories.Data)
+                                        {
+                                            <option value="@category.Id">@category.Name</option>
+                                        }
+                                    }
+
+                                </InputSelect>
+                                <button type="button" class="btn btn-sm btn-outline-primary ml-2" @onclick="ShowAddCategoryModal"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Brand -->
+                        <div class="form-group col-md-6">
+                            <label for="brandId">Brand</label>
+                            <div class="d-flex">
+                                <InputSelect id="brandId" class="form-control" @bind-Value="productRequest.BrandId">
+                                    <option value="">Select Brand</option>
+                                    @if (brands == null)
+                                    {
+                                        <p><em>Loading...</em></p>
+                                    }
+                                    else if (brands.isSuccess)
+                                    {
+                                        @foreach (var brand in brands.Data)
+                                        {
+                                            <option value="@brand.Id">@brand.Name</option>
+                                        }
+                                    }
+                                </InputSelect>
+                                <button type="button" class="btn btn-sm btn-outline-primary ml-2" @onclick="ShowAddBrandModal"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+
+                    <!-- Multi Image Upload -->
+                    <label for="multiImage">Other Images</label>
+                    <div class="image-upload-row">
+                        <div id="multiImagePreview" class="multi-preview-container">
+                        @foreach (var image in multipleImagePreviews)
+                            {
+                                <div class="preview-item">
+                                    <img src="@image.DataUrl" @onclick="() => ShowFullImageModal(image.DataUrl)" />
+                                    <button type="button" class="overlay-button" @onclick="() => RemoveMultiImage(image.FileName)">&times;</button>
+                                </div>
+                            }
+                        </div>
+                        <div class="image-upload-box">
+                            <InputFile id="multiImage" OnChange="HandleMultipleImageUpload" accept="image/*" multiple />
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary float-right">Submit</button>
+            </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ============================================================== -->
+<!-- end basic form  -->
+<!-- ============================================================== -->
+<!-- Modal for Image Preview -->
+<div class="modal-fullscreen" style="@(showFullImageModal ? "display: flex;" : "display: none;")" @onclick="HideFullImageModal">
+    <span class="modal-close" @onclick="HideFullImageModal">&times;</span>
+    <img src="@modalImage" @onclick:stopPropagation="true" class="modalImage" />
+</div>
+
+<!-- Modal for Adding New Category -->
+<ModalComponent Title="Add New Category" ShowModal="@showAddCategoryModal" OnSave="AddNewCategory" OnClose="HideAddCategoryModal">
+    <label for="CategoryThumbnail">Category Thumbnail</label>
+    <div class="thumbnail-upload-row">
+        <div class="thumbnail-preview-container" id="categoryThumbnailPreviewContainer" style="@(categoryThumbnailPreview.DataUrl == null ? "display: none;" : "")">
+            <img id="categoryThumbnailPreview" class="rounded" src="@categoryThumbnailPreview.DataUrl" alt="Category Thumbnail Preview" @onclick="() => ShowFullImageModal(categoryThumbnailPreview.DataUrl)">
+            <button type="button" class="overlay-button" @onclick="RemoveCategoryThumbnail">&times;</button>
+        </div>
+
+        <div class="thumbnail-upload-box" id="categoryThumbnailUploadBox" style="@(categoryThumbnailPreview.DataUrl != null ? "display: none;" : "")">
+            <InputFile id="CategoryThumbnail" OnChange="HandleCategoryThumbnailUpload" accept="image/*" />
+            <i class="fas fa-cloud-upload-alt"></i>
+        </div>
+    </div>
+
+    <label for="newCategoryName">Category Name</label>
+    <InputText id="newCategoryName" class="form-control" @bind-Value="categoryRequest.Name" placeholder="Enter category name" />
+
+    <label for="newCategoryDescription">Category Description</label>
+    <InputText id="newCategoryDescription" class="form-control" @bind-Value="categoryRequest.Description" placeholder="Enter category Description" />
+</ModalComponent>
+
+<!-- Modal for Adding New Brand -->
+<ModalComponent Title="Add New Brand" ShowModal="@showAddBrandModal" OnSave="AddNewBrand" OnClose="HideAddBrandModal">
+    <label for="BrandThumbnail">Brand Thumbnail</label>
+    <div class="thumbnail-upload-row">
+        <div class="thumbnail-preview-container" id="brandThumbnailPreviewContainer" style="@(brandThumbnailPreview.DataUrl == null ? "display: none;" : "")">
+            <img id="brandThumbnailPreview" class="rounded" src="@brandThumbnailPreview.DataUrl" alt="Brand Thumbnail Preview" @onclick="() => ShowFullImageModal(brandThumbnailPreview.DataUrl)">
+            <button type="button" class="overlay-button" @onclick="RemoveBrandThumbnail">&times;</button>
+        </div>
+
+        <div class="thumbnail-upload-box" id="brandThumbnailUploadBox" style="@(brandThumbnailPreview.DataUrl != null ? "display: none;" : "")">
+            <InputFile id="BrandThumbnail" OnChange="HandleBrandThumbnailUpload" accept="image/*" />
+            <i class="fas fa-cloud-upload-alt"></i>
+        </div>
+    </div>
+
+    <label for="newBrandName">Brand Name</label>
+    <InputText id="newBrandName" class="form-control" @bind-Value="brandRequest.Name" placeholder="Enter brand name" />
+</ModalComponent>
+
+
+
+@code {
+    private BaseResponse<List<CategoryResponseModel>> categories;
+    private BaseResponse<List<BrandResponseModel>> brands;
+    private ProductRequestModel productRequest = new ProductRequestModel();
+    private BrandRequestModel brandRequest = new BrandRequestModel();
+    private CategoryRequestModel categoryRequest = new CategoryRequestModel();
+    private ImagePreviewModel mainImagePreview = new();
+    private List<ImagePreviewModel> multipleImagePreviews = new();
+    private ImagePreviewModel categoryThumbnailPreview = new();
+    private ImagePreviewModel brandThumbnailPreview = new();
+    private bool showFullImageModal = false;
+    private bool showAddCategoryModal = false;
+    private bool showAddBrandModal = false;
+    private string modalImage;
+    private long maxAllowedSize = 5242880;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        categories = await CategoryClient.GetCategoriesAsync();
+        brands = await BrandClient.GetBrandsAsync();
+
+
+    }
+
+    private async Task HandleMainImageUpload(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            if (e.File != null)
+            {
+                var file = e.File;
+                var stream = new MemoryStream();
+                await file.OpenReadStream(maxAllowedSize).CopyToAsync(stream);
+                var buffer = stream.ToArray();
+                var mainImageDataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+                mainImagePreview = new ImagePreviewModel
+                    {
+                        FileName = file.Name,
+                        DataUrl = mainImageDataUrl
+                    };
+                stream.Position = 0;
+                productRequest.MainImageFile = new CloudinaryRequestModel
+                    {
+                        File = new FormFile(stream, 0, stream.Length, null, file.Name)
+                        {
+                            Headers = new HeaderDictionary(),
+                            ContentType = file.ContentType
+                        }
+                    };
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error uploading file: {ex.Message}");
+        }
+    }
+
+    private async Task HandleMultipleImageUpload(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            if (!multipleImagePreviews.Any(f => f.FileName == file.Name))
+            {
+                var stream = new MemoryStream();
+                await file.OpenReadStream(maxAllowedSize).CopyToAsync(stream);
+                var buffer = stream.ToArray();
+                var dataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+
+                multipleImagePreviews.Add(new ImagePreviewModel
+                    {
+                        FileName = file.Name,
+                        DataUrl = dataUrl
+                    });
+                Console.WriteLine($"multiple image added: {multipleImagePreviews[0].FileName}");
+
+                productRequest.ProductImages ??= new List<CloudinaryRequestModel>();
+                stream.Position = 0;
+                productRequest.ProductImages.Add(new CloudinaryRequestModel
+                    {
+                        File = new FormFile(stream, 0, stream.Length, null, file.Name)
+                        {
+                            Headers = new HeaderDictionary(),
+                            ContentType = file.ContentType
+                        }
+                    });
+            }
+        }
+    }
+
+    private void RemoveMainImage()
+    {
+        productRequest.MainImageFile = null;
+        mainImagePreview = new();
+    }
+
+    private void RemoveMultiImage(string fileName)
+    {
+        var image = multipleImagePreviews.FirstOrDefault(f => f.FileName == fileName);
+        if (image != null)
+        {
+            multipleImagePreviews.Remove(image);
+            var file = productRequest.ProductImages.FirstOrDefault(f => f.File.FileName == fileName);
+            if (file != null)
+            {
+                productRequest.ProductImages.Remove(file);
+            }
+        }
+    }
+
+    private void ShowFullImageModal(string image)
+    {
+        modalImage = image;
+        showFullImageModal = true;
+    }
+
+    private void HideFullImageModal()
+    {
+        showFullImageModal = false;
+    }
+
+    private void ShowAddBrandModal() => showAddBrandModal = true;
+    private void HideAddBrandModal() => showAddBrandModal = false;
+
+    private void ShowAddCategoryModal() => showAddCategoryModal = true;
+    private void HideAddCategoryModal() => showAddCategoryModal = false;
+
+
+    private async Task AddNewBrand()
+    {
+
+        var response = await BrandClient.CreateBrandAsync(brandRequest);
+
+        if (response.isSuccess)
+        {
+            brands = await BrandClient.GetBrandsAsync();
+            HideAddBrandModal();
+        }
+    }
+
+    private async Task AddNewCategory()
+    {
+        var response = await CategoryClient.CreateCategoryAsync(categoryRequest);
+
+        if (!response.isSuccess)
+        {
+            await ToastrService.Error("Error Occured while creating category", "Upload Error");
+            return;
+        }
+        categories = await CategoryClient.GetCategoriesAsync();
+        HideAddCategoryModal();
+    }
+
+    private async Task HandleCategoryThumbnailUpload(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            if (e.File != null)
+            {
+                var file = e.File;
+                var stream = new MemoryStream();
+                await file.OpenReadStream(maxAllowedSize).CopyToAsync(stream);
+                var buffer = stream.ToArray();
+                var thumbnailDataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+                categoryThumbnailPreview = new ImagePreviewModel
+                    {
+                        FileName = file.Name,
+                        DataUrl = thumbnailDataUrl
+                    };
+                stream.Position = 0;
+                categoryRequest.Thumbnail = new CloudinaryRequestModel
+                    {
+                        File = new FormFile(stream, 0, stream.Length, null, file.Name)
+                        {
+                            Headers = new HeaderDictionary(),
+                            ContentType = file.ContentType
+                        }
+                    };
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error uploading category thumbnail: {ex.Message}");
+        }
+    }
+
+    private async Task HandleBrandThumbnailUpload(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            if (e.File != null)
+            {
+                var file = e.File;
+                var stream = new MemoryStream();
+                await file.OpenReadStream(maxAllowedSize).CopyToAsync(stream);
+                var buffer = stream.ToArray();
+                var thumbnailDataUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+                brandThumbnailPreview = new ImagePreviewModel
+                    {
+                        FileName = file.Name,
+                        DataUrl = thumbnailDataUrl
+                    };
+                stream.Position = 0;
+                brandRequest.Thumbnail = new CloudinaryRequestModel
+                {
+                    File = new FormFile(stream, 0, stream.Length, null, file.Name)
+                    {
+                        Headers = new HeaderDictionary(),
+                        ContentType = file.ContentType
+                    }
+                }; 
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error uploading brand thumbnail: {ex.Message}");
+        }
+    }
+
+    private void RemoveCategoryThumbnail()
+    {
+        categoryRequest.Thumbnail = null;
+        categoryThumbnailPreview = new();
+    }
+
+    private void RemoveBrandThumbnail()
+    {
+        brandRequest.Thumbnail = null;
+        brandThumbnailPreview = new();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Console.WriteLine(productRequest.Description);
+        Console.WriteLine(productRequest.Name);
+        var response = await ProductClient.CreateProductAsync(productRequest);
+        if (response.isSuccess)
+        {
+            await ToastrService.Success("Products uploaded successfully", "Upload Complete");
+        }
+    }
+
+    public class ImagePreviewModel
+    {
+        public string FileName { get; set; }
+        public string DataUrl { get; set; }
+    }
+}
+

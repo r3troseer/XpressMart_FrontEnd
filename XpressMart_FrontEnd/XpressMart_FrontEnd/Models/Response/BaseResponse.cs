@@ -2,7 +2,12 @@
 
 namespace XpressMart_FrontEnd.Models.Response
 {
-
+    public class BaseResponse
+    {
+        public bool isSuccess { get; set; }
+        public bool isFailure { get; set; }
+        public Error Error { get; set; }
+    }
 
     public class BaseResponse<T>
     {
@@ -10,6 +15,5 @@ namespace XpressMart_FrontEnd.Models.Response
         public bool isFailure { get; set; }
         public Error Error { get; set; }
         public T Data { get; set; }
-
     }
 }

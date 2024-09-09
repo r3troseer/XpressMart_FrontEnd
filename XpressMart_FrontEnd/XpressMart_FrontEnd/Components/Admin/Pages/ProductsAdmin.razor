@@ -1,0 +1,234 @@
+﻿@page "/admin/products"
+@using XpressMart_FrontEnd.Client.CategoryClient
+@using XpressMart_FrontEnd.Models.Response
+@using XpressMart_FrontEnd.Models.Response.CategoryResponse
+@using XpressMart_FrontEnd.Models.Response.ProductResponse
+@using XpressMart_FrontEnd.Services.ImageService
+
+@inject IJSRuntime JSRuntime
+@inject ICategoryClient CategoryClient
+@inject IImageService ImageService
+
+@rendermode InteractiveServer
+
+<PageTitle>Products</PageTitle>
+<link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.1.4/b-3.1.1/b-html5-3.1.1/b-print-3.1.1/sl-2.0.5/datatables.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+
+<!-- ============================================================== -->
+<!-- pageheader -->
+<!-- ============================================================== -->
+<div class="row">
+    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+        <div class="page-header">
+            <h2 class="pageheader-title">Data Tables</h2>
+            <p class="pageheader-text">Proin placerat ante duiullam scelerisque a velit ac porta, fusce sit amet vestibulum mi. Morbi lobortis pulvinar quam.</p>
+            <div class="page-breadcrumb">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="#" class="breadcrumb-link">Tables</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Data Tables</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ============================================================== -->
+<!-- end pageheader -->
+<!-- ============================================================== -->
+<div class="row">
+    <!-- ============================================================== -->
+    <!-- data table  -->
+    <!-- ============================================================== -->
+    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Data Tables - Print, Excel, CSV, PDF Buttons</h5>
+                <p>This example shows DataTables and the Buttons extension being used with the Bootstrap 4 framework providing the styling.</p>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="product-table" class="table display second  table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th class="align-center"><input type="checkbox" id="select-all-checkbox" /></th>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                @* <th>Status</th> *@
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be populated by DataTables via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Confirmation Modal -->
+                <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to <strong>@SelectedAction</strong> the selected product(s)?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" @onclick="ConfirmAction">Confirm</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ============================================================== -->
+    <!-- end data table  -->
+    <!-- ============================================================== -->
+</div>
+        
+
+
+
+
+@code {
+    private List<ProductResponseModel> products = new List<ProductResponseModel>();
+    private string SelectedAction { get; set; }
+    private DotNetObjectReference<ProductsAdmin> objRef;
+
+    private BaseResponse<List<CategoryResponseModel>>? categories;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("OnInitializedAsync called");
+        categories = await CategoryClient.GetCategoriesAsync();
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine($"OnAfterRenderAsync called with firstRender: {firstRender}");
+        if (firstRender)
+        {
+            try
+            {
+                objRef = DotNetObjectReference.Create(this);
+                await JSRuntime.InvokeVoidAsync("loadScript", "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js");
+                await JSRuntime.InvokeVoidAsync("loadScript", "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js");
+                await JSRuntime.InvokeVoidAsync("loadScript", "https://cdn.datatables.net/v/bs5/jq-3.7.0/jszip-3.10.1/dt-2.1.4/b-3.1.1/b-html5-3.1.1/b-print-3.1.1/sl-2.0.5/datatables.min.js");
+                await JSRuntime.InvokeVoidAsync("loadScript", "admin/js/ProductsAdmin.js");
+                await JSRuntime.InvokeVoidAsync("DataTableInterop.initializeDataTable", objRef);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing charts: {ex.Message}");
+            }
+        }
+
+    }
+
+    [JSInvokable]
+    public async Task AddProducts()
+    {
+        // Logic to add new products
+        // You could open a modal for adding products or redirect to a different page
+    }
+
+    [JSInvokable]
+    public async Task EditProduct(int productId)
+    {
+        // Logic to edit the product with the specified ID
+        // You could open a modal with a form pre-filled with product data or redirect to a different page
+    }
+
+    [JSInvokable]
+    public async Task DeleteProduct(int productId)
+    {
+        try
+        {
+            // // Call your backend API to delete the product
+            // // var response = await HttpClient.DeleteAsync($"api/products/{productId}");
+            // if (response.IsSuccessStatusCode)
+            // {
+            //     // Refresh the product list or trigger a reload of the DataTable
+            //     // products = await HttpClient.GetFromJsonAsync<List<ProductDTO>>("api/products");
+            //     await JSRuntime.InvokeVoidAsync("$('#product-table').DataTable().ajax.reload");
+            //     await JSRuntime.InvokeVoidAsync("toastr.success", "Product deleted successfully");
+            // }
+            // else
+            // {
+            //     await JSRuntime.InvokeVoidAsync("toastr.error", "Failed to delete product");
+            // }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("toastr.error", $"An error occurred: {ex.Message}");
+        }
+    }
+
+    [JSInvokable]
+    public async Task ChangeProductStatus(List<int> productIds, bool isActive)
+    {
+        try
+        {
+            // // var response = await HttpClient.PostAsJsonAsync("api/products/change-status", new { ProductIds = productIds, IsActive = isActive });
+            // if (response.IsSuccessStatusCode)
+            // {
+            //     // Refresh the product list or trigger a reload of the DataTable
+            //     // products = await HttpClient.GetFromJsonAsync<List<ProductDTO>>("api/products");
+            //     await JSRuntime.InvokeVoidAsync("$('#product-table').DataTable().ajax.reload");
+            //     await JSRuntime.InvokeVoidAsync("toastr.success", "Products status updated successfully");
+            // }
+            // else
+            // {
+            //     await JSRuntime.InvokeVoidAsync("toastr.error", "Failed to update product status");
+            // }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("toastr.error", $"An error occurred: {ex.Message}");
+        }
+    }
+
+    private async Task ConfirmAction()
+    {
+        SelectedAction = await JSRuntime.InvokeAsync<string>("getModalAction");
+        await JSRuntime.InvokeVoidAsync("DataTableInterop.onConfirm", SelectedAction);
+    }
+
+    [JSInvokable]
+    public string GetImageLoadingStatus(string productId)
+    {
+        return ImageService.GetImageLoadingStatus(productId);
+    }
+
+    [JSInvokable]
+    public void InitiateImageLoad(string productId, string imageId,string? fileString)
+    {
+        var product = new ProductResponseModel { Id = productId, MainImageFileId = imageId, MainImageDetail = new MainImageResponseModel { FileString = fileString } };
+        _ = ImageService.FetchImage(product, StateHasChanged);
+    }
+
+    [JSInvokable]
+    public string GetImageLoadingError(string productId)
+    {
+        return ImageService.GetImageLoadingError(productId);
+    }
+
+
+    public void Dispose()
+    {
+        objRef?.Dispose();
+    }
+
+}

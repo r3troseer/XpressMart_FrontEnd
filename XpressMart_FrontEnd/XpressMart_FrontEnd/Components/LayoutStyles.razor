@@ -1,0 +1,61 @@
+﻿@inject LayoutService LayoutService
+@implements IDisposable
+
+<PageTitle>@PageTitle</PageTitle>
+
+    @if (LayoutService.CurrentLayout == "admin")
+{
+    <link rel="stylesheet" href="admin/bootstrap/css/bootstrap.min.css">
+    <link href="admin/fonts/circular-std/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="admin/css/style.css">
+    <link rel="stylesheet" href="admin/charts/chartist-bundle/chartist.css">
+    <link rel="stylesheet" href="admin/charts/morris-bundle/morris.css">
+    <link rel="stylesheet" href="admin/fonts/material-design-iconic-font/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="admin/charts/c3charts/c3.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+}
+
+else if(LayoutService.CurrentLayout == "auth")
+{
+    <link type="text/css" rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="Auth/Auth.css" />
+    <link rel="stylesheet" href="admin/css/style.css">
+}
+
+else
+{
+    <!-- Bootstrap -->
+    <link type="text/css" rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+
+    <!-- Slick -->
+    <link type="text/css" rel="stylesheet" href="css/slick.css" />
+    <link type="text/css" rel="stylesheet" href="css/slick-theme.css" />
+
+    <!-- nouislider -->
+    <link type="text/css" rel="stylesheet" href="css/nouislider.min.css" />
+
+    <!-- Font Awesome Icon -->
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+
+    <!-- Custom stlylesheet -->
+    <link type="text/css" rel="stylesheet" href="css/style.css" />
+
+    <link rel="stylesheet" href="XpressMart_FrontEnd.styles.css" />    
+}
+
+@code {
+    [Parameter]
+    public string PageTitle { get; set; } = "XpressMart";
+
+    protected override void OnInitialized()
+    {
+        LayoutService.CurrentLayout ??= "admin";
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+    }
+}

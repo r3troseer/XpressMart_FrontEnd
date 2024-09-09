@@ -1,0 +1,77 @@
+﻿@page "/admin/auth/login"
+
+@using Blazored.LocalStorage
+@using Microsoft.AspNetCore.Components.Authorization
+@using XpressMart_FrontEnd.Client.AuthClient
+@using XpressMart_FrontEnd.Models.Auth
+@using XpressMart_FrontEnd.Services.AuthService
+
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ILocalStorageService LocalStorageService
+@inject IAuthClient AuthClient
+@inject NavigationManager NavigationManager
+@inject ToastrService ToastrService
+
+@rendermode InteractiveServer
+
+<PageTitle>Admin login</PageTitle>
+<div class="auth-box slim">
+	<div class="center">
+		<div class="content">
+			<div class="header">
+				<div class="logo text-center"><img src="/img/x_logo_dark.png" alt="XpressMart Logo"></div>
+				<p class="lead">Login to your admin account</p>
+			</div>
+			<EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="AdminLogin">
+				<DataAnnotationsValidator />
+				<ValidationSummary />
+				<div class="form-group">
+					
+					<InputText id="email" type="email"  class="form-control" placeholder="Email" @bind-Value="loginModel.Email" />
+
+				</div>
+				<div class="form-group">
+					<label for="password" class="control-label sr-only">Password</label>
+					<InputText id="password" type="password" class="form-control" placeholder="Password" @bind-Value="loginModel.Password" />
+				</div>
+				<div class="form-group clearfix">
+					<label class="fancy-checkbox pull-left">
+						<input type="checkbox">
+						<span>Remember me</span>
+					</label>
+				</div>
+				<button type="submit" class="btn btn-primary btn-lg btn-block">LOGIN</button>
+				<div class="bottom">
+					<span class="helper-text"><i class="fa fa-lock"></i> <a href="#">Forgot password?</a></span>
+				</div>
+			</EditForm>
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+</div>
+
+@code {
+	private LoginModel loginModel = new LoginModel();
+
+	private async Task HandleLogin()
+	{
+		Console.WriteLine(loginModel.Email);
+		Console.WriteLine(loginModel.Password);
+		var response = await AuthClient.LoginAsync(loginModel);
+
+		if (response != null)
+		{
+			if (!response.IsSuccess)
+			{
+				await ToastrService.Error("test", "error");
+				return;
+			}
+
+			// ((CustomAuthenticationStateProvider)AuthenticationStateProvider).AuthenticateUser(response.Message);
+			await ToastrService.Success("", "Logged in Successfully");
+			NavigationManager.NavigateTo("/admin/dashboard");
+		}
+	}
+}
