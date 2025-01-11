@@ -63,7 +63,5 @@
 #*.RTF   diff=astextplain
 
 
-
-
-*.js linguist-vendored
-!XpressMart_FrontEnd/XpressMart_FrontEnd/wwwroot/js/main.js
+*.js linguist-vendored=true
+!XpressMart_FrontEnd/XpressMart_FrontEnd/wwwroot/js/main.js linguist-vendored=false
