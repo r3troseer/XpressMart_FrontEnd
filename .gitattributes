@@ -64,4 +64,4 @@
 
 
 *.js linguist-vendored=true
-!XpressMart_FrontEnd/XpressMart_FrontEnd/wwwroot/js/main.js linguist-vendored=false
+XpressMart_FrontEnd/XpressMart_FrontEnd/wwwroot/js/main.js linguist-vendored=false
