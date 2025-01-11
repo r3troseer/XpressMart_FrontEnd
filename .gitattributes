@@ -66,4 +66,4 @@
 
 
 *.js linguist-vendored
-!XpressMart_FrontEnd/XpressMart_FrontEnd/wwwroot/js/main.js linguist-vendored
+!XpressMart_FrontEnd/XpressMart_FrontEnd/wwwroot/js/main.js
